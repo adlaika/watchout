@@ -14,11 +14,13 @@
     bestScore: 0
   };
 
+  // This converts px size to consistent axes
   var axes = {
     x: d3.scale.linear().domain([0,100]).range([0,gameOptions.width]),
     y: d3.scale.linear().domain([0,100]).range([0,gameOptions.height])
   };
 
+  // Appends the SVG board to the container element where gameplay happens
   var gameBoard = d3.select('.container').append('svg:svg')
   .attr('width', gameOptions.width)
   .attr('height', gameOptions.height)
@@ -44,11 +46,14 @@
     });
   };
 
+  //
   var render = function(enemy_data){
+    // Associates enemy data set with their svg elements
     var enemies = gameBoard.selectAll('circle.enemy')
     .data( enemy_data, function(d){ return d.id } );
-    console.log(enemies);
 
+    // Subselects enemies with no corresponding SVG elements
+    // Associates class, location and size
     enemies.enter()
     .append('svg:circle')
     .attr('class', 'enemy')
@@ -56,9 +61,11 @@
     .attr('cy', function(enemy){ return axes.y(enemy.y);} )
     .attr('r', 10);
 
+    // Subselect SVG elements without data and remove
     enemies.exit()
     .remove();
 
+    // Handles frame by frame animation
     var tweenMagic = function(data) {
       var enemy = d3.select(this);
 
@@ -85,15 +92,16 @@
       }
     }
 
+    // Smoothly animates enemies to new positions using tweenMagic
     enemies.transition()
-    .duration(2000)
-    .tween('custom',tweenMagic)
+    .duration(gameOptions.interval)
+    .tween('custom',tweenMagic);
   };
 
-  var t= .5;
-  var last = 0;
+  // Begin Execution
   var gameTurn = function () {
     render(createEnemies());
+    // Recalls gameTurn at intervals to change enemy position
     d3.timer(makeCallback(), gameOptions.interval);
     return true;
   };
@@ -103,6 +111,6 @@
     return gameTurn;
   };
 
-  d3.timer(makeCallback(), gameOptions.interval);
-
+  //Initiate!
+  gameTurn();
 })();
