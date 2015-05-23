@@ -1,11 +1,12 @@
 (function () {
-'use strict';
+  'use strict';
 
   var gameOptions = {
     height: 750,
     width: 450,
     nEnemies: 30,
-    padding: 20
+    padding: 20,
+    interval: 2000
   };
 
   var gameStats = {
@@ -19,8 +20,8 @@
   };
 
   var gameBoard = d3.select('.container').append('svg:svg')
-    .attr('width', gameOptions.width)
-    .attr('height', gameOptions.height)
+  .attr('width', gameOptions.width)
+  .attr('height', gameOptions.height)
 
   var GameElement = function(x, y){
     this.x = x;
@@ -45,67 +46,63 @@
 
   var render = function(enemy_data){
     var enemies = gameBoard.selectAll('circle.enemy')
-      .data( enemy_data, function(d){ return d.id } );
-      console.log(enemies);
+    .data( enemy_data, function(d){ return d.id } );
+    console.log(enemies);
 
     enemies.enter()
-      .append('svg:circle')
-        .attr('class', 'enemy')
-        .attr('cx', function(enemy){ return axes.x(enemy.x);} )
-        .attr('cy', function(enemy){ return axes.y(enemy.y);} )
-        .attr('r', 10);
+    .append('svg:circle')
+    .attr('class', 'enemy')
+    .attr('cx', function(enemy){ return axes.x(enemy.x);} )
+    .attr('cy', function(enemy){ return axes.y(enemy.y);} )
+    .attr('r', 10);
 
     enemies.exit()
-      .remove();
+    .remove();
 
-//beginning of weirdness
-    var enemy = d3.selectAll('.enemy')
+    var tweenMagic = function(data) {
+      var enemy = d3.select(this);
 
-    var enemyNextPos = {
-      x: 50,
-      y: 50
+      var startPosition = {
+        x: parseFloat(enemy.attr('cx')),
+        y: parseFloat(enemy.attr('cy'))
+      };
+
+      var endPosition = {
+        x: axes.x(data.x),
+        y: axes.y(data.y)
+      };
+
+      return function(t) {
+        // Increments frame position based on difference of x or y over time
+        var enemyNextPos = {
+          x: startPosition.x + (endPosition.x - startPosition.x)*t,
+          y: startPosition.y + (endPosition.y - startPosition.y)*t
+        }
+
+        // Resets the positions of the enemy to the incremented position
+        enemy.attr('cx', enemyNextPos.x)
+        .attr('cy', enemyNextPos.y)
+      }
     }
 
     enemies.transition()
-      .duration(2000)
-      .tween('custom', enemy.attr('cx', enemyNextPos.x)
-            .attr('cy', enemyNextPos.y))
+    .duration(2000)
+    .tween('custom',tweenMagic)
   };
-
-//end of weirdness
-  var play = function () {
-    console.log("turn started!")
-
-  };
-
 
   var t= .5;
   var last = 0;
   var gameTurn = function () {
     render(createEnemies());
-    d3.timer(makeCallback(), 2000);
+    d3.timer(makeCallback(), gameOptions.interval);
     return true;
   };
-  //gameTurn();
-  // d3.timer(function(elapsed) {
-  //   t = (t + (elapsed - last) / 1000) % 1;
-  //   last = elapsed;
-  //   gameTurn();
-  // });
 
-var interval = 2000;
-
-var makeCallback = function() {
-
+  var makeCallback = function() {
     // note that we're returning a new callback function each time
-    // return function() {
-    //     console.log('OH HAI!!');
-    //     d3.timer(makeCallback(),interval);
-    //     return true;
-    // }
     return gameTurn;
-};
+  };
 
-d3.timer(makeCallback(),interval);
+  d3.timer(makeCallback(), gameOptions.interval);
 
 })();
