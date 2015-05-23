@@ -2,8 +2,8 @@
   'use strict';
 
   var gameOptions = {
-    height: 750,
-    width: 450,
+    height: 500,
+    width: 1000,
     nEnemies: 30,
     padding: 20,
     interval: 2000
@@ -21,9 +21,9 @@
   };
 
   // Appends the SVG board to the container element where gameplay happens
-  var gameBoard = d3.select('.container').append('svg:svg')
-  .attr('width', gameOptions.width)
-  .attr('height', gameOptions.height)
+  var gameBoard = d3.select('.container').append('svg')
+    .attr('width', gameOptions.width)
+    .attr('height', gameOptions.height);
 
   var GameElement = function(x, y){
     this.x = x;
@@ -33,6 +33,7 @@
   //Player Construction
   var Player = function(x, y) {
     GameElement.apply(this, arguments);
+    this.id = 'player';
     this.fill = '#ff6600';
     this.r = 8;
   }
@@ -40,36 +41,22 @@
   Player.prototype = Object.create(GameElement.prototype);
   Player.prototype.constructor = Player;
 
-  Player.prototype.render = function () {
-    return gameBoard.append('svg:circle')
-      .attr('r', this.r)
-      .attr('fill', this.fill)
-      .attr('cx', function(){
-        return axes.x(this.x);
-      })
-      .attr('cy', function(){
-        return axes.y(this.y);
-      });
-  }
+  var drag = d3.behavior.drag()
+               .on('dragstart', function() { player.style('fill', 'red'); })
+               .on('drag', function() { player.attr('cx', d3.event.x)
+                                              .attr('cy', d3.event.y); })
+               .on('dragend', function() { player.style('fill', 'purple'); });
 
-  //trying to append player to gameBoard
-  var player = new Player(50, 50);
-  var makePlayer = gameBoard.selectAll('circle.player')
-    .data( player, function(d){ return d} );
-    debugger;
-  makePlayer.enter()
-    .append('svg:circle')
-    .attr('r', player.r)
-    .attr('fill', player.fill)
-    .attr('cx', function(){
-      return axes.x(player.x);
-    })
-    .attr('cy', function(){
-      return axes.y(player.y);
-    });
-  //end attempt
-
-  //player.render();
+  var player = gameBoard.selectAll('.draggablePlayer')
+                .data([{ x: (gameOptions.width / 2), y: (gameOptions.height / 2), r: 8 }])
+                .enter()
+                .append('svg:circle')
+                .attr('class', 'draggablePlayer')
+                .attr('cx', function(d) { return d.x; })
+                .attr('cy', function(d) { return d.y; })
+                .attr('r', function(d) { return d.r; })
+                .call(drag)
+                .style('fill', 'purple');
 
   //Enemy Construction
   var Enemy = function(x, y, id){
@@ -88,8 +75,8 @@
     });
   };
 
-  //
   var render = function(enemy_data){
+    console.log(enemy_data);
     // Associates enemy data set with their svg elements
     var enemies = gameBoard.selectAll('circle.enemy')
     .data( enemy_data, function(d){ return d.id } );
@@ -156,3 +143,34 @@
   //Initiate!
   gameTurn();
 })();
+
+//Player pseudoclassical notes
+
+  //trying to append player to gameBoard
+  // Player.prototype.render = function () {
+  //   return gameBoard.append('circle')
+  //     .attr('r', this.r)
+  //     .attr('fill', this.fill)
+  //     .attr('cx', function(){
+  //       return axes.x(this.x);
+  //     })
+  //     .attr('cy', function(){
+  //       return axes.y(this.y);
+  //     });
+  // }
+
+  //end attempt
+
+  //player.render();
+
+
+  // var player = new Player(50, 50);
+  // gameBoard.append('circle')
+  //   .attr('r', player.r)
+  //   .attr('fill', player.fill)
+  //   .attr('cx', function(){
+  //     return axes.x(player.x);
+  //   })
+  //   .attr('cy', function(){
+  //     return axes.y(player.y);
+  //   });
