@@ -100,14 +100,18 @@
       var yDiff = parseFloat(enemy.attr('cy')) - parseFloat(player.attr('cy'));
 
       var separation = Math.sqrt( Math.pow(xDiff,2) + Math.pow(yDiff,2));
-      // debugger;
+
       if (separation < radiusSum) {
         collidedCallback(player, enemy);
       }
     };
 
+    // Updates scores
     var onCollision = function(){
-      console.log('ouch');
+      if (gameStats.score > gameStats.bestScore){
+        gameStats.bestScore = gameStats.score;
+      }
+      gameStats.score = 0;
     }
 
     // Handles frame by frame animation
@@ -125,8 +129,14 @@
       };
 
       return function(t) {
+        gameStats.score++;
         checkCollision(enemy, onCollision);
 
+        d3.select('#high')
+          .text(Math.floor(gameStats.bestScore / 100));
+
+        d3.select('#current')
+          .text(Math.floor(gameStats.score / 100));
         // Increments frame position based on difference of x or y over time
         var enemyNextPos = {
           x: startPosition.x + (endPosition.x - startPosition.x)*t,
@@ -192,3 +202,36 @@
   //   .attr('cy', function(){
   //     return axes.y(player.y);
   //   });
+
+//initiating
+
+// var play = function(){
+//     var gameTurn = function () {
+//       render(createEnemies());
+//       // Recalls gameTurn at intervals to change enemy position
+//       return true;
+//     };
+
+//     var turnCallback = function() {
+//       // note that we're returning a new callback function each time
+//       return gameTurn;
+//     };
+
+//     var scoreUpdate = function () {
+//       // Recalls gameTurn at intervals to change enemy position
+//       d3.timer(scoreCallback(), 50);
+//       return true;
+//     };
+
+//     var scoreCallback = function() {
+//       // note that we're returning a new callback function each time
+//       return scoreUpdate;
+//     };
+
+//     d3.timer(turnCallback(), gameOptions.interval);
+//     d3.timer(scoreCallback(), 50);
+//   }
+
+//   //Initiate!
+//   play();
+
