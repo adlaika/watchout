@@ -47,6 +47,7 @@
     var enemies = gameBoard.selectAll('circle.enemy')
       .data( enemy_data, function(d){ return d.id } );
       console.log(enemies);
+
     enemies.enter()
       .append('svg:circle')
         .attr('class', 'enemy')
@@ -56,13 +57,55 @@
 
     enemies.exit()
       .remove();
+
+//beginning of weirdness
+    var enemy = d3.selectAll('.enemy')
+
+    var enemyNextPos = {
+      x: 50,
+      y: 50
+    }
+
+    enemies.transition()
+      .duration(2000)
+      .tween('custom', enemy.attr('cx', enemyNextPos.x)
+            .attr('cy', enemyNextPos.y))
   };
 
+//end of weirdness
   var play = function () {
+    console.log("turn started!")
+
+  };
+
+
+  var t= .5;
+  var last = 0;
+  var gameTurn = function () {
     render(createEnemies());
-  }
+    d3.timer(makeCallback(), 2000);
+    return true;
+  };
+  //gameTurn();
+  // d3.timer(function(elapsed) {
+  //   t = (t + (elapsed - last) / 1000) % 1;
+  //   last = elapsed;
+  //   gameTurn();
+  // });
 
-  play();
+var interval = 2000;
 
+var makeCallback = function() {
+
+    // note that we're returning a new callback function each time
+    // return function() {
+    //     console.log('OH HAI!!');
+    //     d3.timer(makeCallback(),interval);
+    //     return true;
+    // }
+    return gameTurn;
+};
+
+d3.timer(makeCallback(),interval);
 
 })();
