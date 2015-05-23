@@ -30,6 +30,48 @@
     this.y = y;
   };
 
+  //Player Construction
+  var Player = function(x, y) {
+    GameElement.apply(this, arguments);
+    this.fill = '#ff6600';
+    this.r = 8;
+  }
+
+  Player.prototype = Object.create(GameElement.prototype);
+  Player.prototype.constructor = Player;
+
+  Player.prototype.render = function () {
+    return gameBoard.append('svg:circle')
+      .attr('r', this.r)
+      .attr('fill', this.fill)
+      .attr('cx', function(){
+        return axes.x(this.x);
+      })
+      .attr('cy', function(){
+        return axes.y(this.y);
+      });
+  }
+
+  //trying to append player to gameBoard
+  var player = new Player(50, 50);
+  var makePlayer = gameBoard.selectAll('circle.player')
+    .data( player, function(d){ return d} );
+    debugger;
+  makePlayer.enter()
+    .append('svg:circle')
+    .attr('r', player.r)
+    .attr('fill', player.fill)
+    .attr('cx', function(){
+      return axes.x(player.x);
+    })
+    .attr('cy', function(){
+      return axes.y(player.y);
+    });
+  //end attempt
+
+  //player.render();
+
+  //Enemy Construction
   var Enemy = function(x, y, id){
     this.id = id;
     GameElement.apply(this, arguments);
